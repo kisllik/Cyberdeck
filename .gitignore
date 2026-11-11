@@ -1,0 +1,31 @@
+﻿# системное
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# ярлыки
+*.lnk
+
+# данные приложения (сессии, логи, скриншоты self-test)
+data/
+WebView2AI/
+*.log
+shot-*.png
+
+# бэкапы и черновики
+*.backup.*
+backup/
+Новый текстовый документ.txt
+
+# секреты
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+credentials.*
+secrets.*
