@@ -174,3 +174,23 @@ README.md                       этот файл
 - backup\NightCityShell.v6.0.ps1 — резервная копия до редизайна
 - README.md, Install-NightCityShell.ps1, NightCityShell.cmd/.vbs, lib\
 
+---
+
+## 🇬🇧 English Description
+
+**Night City OS** is a Windows shell in Cyberpunk 2077 style.
+- Built with WPF, PowerShell, and WebView2 (Chromium).
+- Features a file manager, system monitoring, and an embedded DeepSeek AI chat.
+- Fully localized (English / Russian).
+
+### Quick Start
+1. Run `NightCityShell.cmd` (no console window).
+2. Press **F11** for fullscreen, **Ctrl+Shift+Q** to exit.
+
+### Support
+If you like this project, you can buy me a coffee via DonationAlerts:
+👉 [Support the project](https://www.donationalerts.com/r/kisllik)
+
+---
+*Licensed under the MIT License.*
+
