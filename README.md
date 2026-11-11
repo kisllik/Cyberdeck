@@ -1,4 +1,4 @@
-﻿# NIGHT CITY OS // RED NETRUNNER EDITION v7.0
+﻿# NIGHT CITY OS // RED NETRUNNER EDITION v7.1
 ![Night City OS Dashboard](screenshot-dashboard.jpg)
 
 Оболочка Windows в стиле Cyberpunk 2077: WPF-интерфейс, Chromium-браузер,

@@ -12,7 +12,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$script:Version   = '7.0'
+$script:Version   = '7.1'
 $script:AppTitle  = 'NIGHT CITY OS'
 
 # ---------- paths ----------
@@ -2269,12 +2269,26 @@ $script:ChatJs = @'
     var el = inputEl();
     return JSON.stringify({ ta: !!el, send: !!(el && findSend(el)) });
   };
-  window.__nc.poll = function () {
+    window.__nc.poll = function () {
     var out = [];
-    var nodes = document.querySelectorAll(".ds-markdown, [class*=ds-markdown], [class*=markdown]");
-    if (nodes.length) {
-      var t = (nodes[nodes.length - 1].innerText || "").trim();
-      if (t && t !== window.__nc.last) { window.__nc.last = t; out.push({ evt: "assistant", text: t }); }
+    // Ищем только главные контейнеры с ответом, а не отдельные абзацы внутри них
+    var nodes = document.querySelectorAll(".ds-markdown");
+    if (nodes.length > 0) {
+      var lastNode = nodes[nodes.length - 1];
+      
+      // Используем textContent, чтобы забрать весь текст, включая переносы строк
+      var t = (lastNode.textContent || "").trim();
+      
+      // Если DeepSeek разбил ответ на несколько блоков, забираем текст у родителя
+      var parent = lastNode.parentElement;
+      if (parent && parent.textContent.length > t.length && parent.textContent.length < t.length + 2000) {
+          t = (parent.textContent || "").trim();
+      }
+      
+      if (t && t !== window.__nc.last) { 
+        window.__nc.last = t; 
+        out.push({ evt: "assistant", text: t }); 
+      }
     }
     return out;
   };
@@ -3221,6 +3235,9 @@ $script:KeyTimer.Add_Tick({
     } catch {}
 })
 
+# ============================================================
+#  МОМЕНТАЛЬНЫЙ ЗАПУСК + ФОНОВАЯ ЗАГРУЗКА
+# ============================================================
 try {
     $savedLang = (Get-ItemProperty -Path 'HKCU:\Software\NightCityOS' -Name 'Language' -ErrorAction Stop).Language
     if ($savedLang -eq 'en' -or $savedLang -eq 'ru') { $script:Lang = $savedLang }
@@ -3229,16 +3246,31 @@ $script:LangReady = $false
 try { (C 'LangSlider').Value = $(if ($script:Lang -eq 'ru') { 1 } else { 0 }) } catch {}
 $script:LangReady = $true
 
+# 1. Мгновенно рисуем интерфейс
 Update-Clock
-Update-Stats
-Update-Weather
 Show-View 'DashboardView'
 if ($script:Lang -eq 'ru') { Translate-Node $Window $script:TrPairsRu }
-Notify $(if ($script:Lang -eq 'ru') { 'СИСТЕМА ГОТОВА // ОБОЛОЧКА ОНЛАЙН' } else { 'SYSTEM READY // SHELL ONLINE' })
+
+# 2. Запускаем легкие таймеры
 $script:ClockTimer.Start()
-$script:StatsTimer.Start()
 $script:KeyTimer.Start()
-$script:WeatherTimer.Start()
+
+# 3. Создаем отложенный таймер для тяжелых данных
+$script:InitTimer = New-Object System.Windows.Threading.DispatcherTimer
+$script:InitTimer.Interval = [TimeSpan]::FromMilliseconds(200)
+$script:InitTimer.Add_Tick({
+    $script:InitTimer.Stop()
+    # Загружаем данные, когда окно уже видно
+    Update-Stats
+    Update-Weather
+    Notify $(if ($script:Lang -eq 'ru') { 'СИСТЕМА ГОТОВА // ОБОЛОЧКА ОНЛАЙН' } else { 'SYSTEM READY // SHELL ONLINE' })
+    $script:StatsTimer.Start()
+    $script:WeatherTimer.Start()
+})
+
+$Window.Add_Loaded({
+    $script:InitTimer.Start()
+})
 
 # ============================================================
 #  SELF-TEST (not used in normal run)
